@@ -1,0 +1,11 @@
+<form method="post" action="/app/createLecture">
+    <label for="course">Course:</label>
+    <select id="course" name="choice" required>
+        {% for course in courses %}
+            <option value="{{ course.name }}">{{ course.name }}</option>
+        {% empty %}
+            <option value="" disabled>No courses available</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Create Lecture</button>
+</form>

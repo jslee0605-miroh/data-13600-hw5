@@ -135,9 +135,24 @@ def createCourse(request):
     
 
 def new_lecture(request):
-    if request.method == "GET":
-        return render(request, 'app/new_lecture.html')
-    return HttpResponse("Error: use a GET request to access create lecture page.", status=405)
+    if request.method != "GET":
+        return HttpResponse("Error: use a GET request to access create lecture page.", status=405)
+    courses = request.user.courses_taught.all() if is_instructor(request.user) else []
+    return render(request, 'app/new_lecture.html', {'courses': courses})
+
+@csrf_exempt
+def createLecture(request):
+    if request.method != "POST":
+        return HttpResponse("Error: only POST is allowed", status=405)
+    if not is_instructor(request.user):
+        return HttpResponse("Error: only instructors can create lectures", status=401)
+    course = Course.objects.filter(name=request.POST.get('choice'), instructor=request.user).first()
+    if course is None:
+        return HttpResponse("Error: course not found or not taught by you", status=404)
+    Lecture.objects.create(course=course)
+    return HttpResponse(f"Lecture for course '{course.name}' created successfully", status=201)
+
+    
 
 def new_qr_upload(request):
     if request.method == "GET":
