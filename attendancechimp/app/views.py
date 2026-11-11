@@ -131,7 +131,7 @@ def createCourse(request):
         **days,
     )
 
-    return HttpResponse(f"Course '{course_name}' created successfully", status=201)
+    return HttpResponse(f"Course '{course_name}' created successfully", status=200)
     
 
 def new_lecture(request):
@@ -150,11 +150,35 @@ def createLecture(request):
     if course is None:
         return HttpResponse("Error: course not found or not taught by you", status=404)
     Lecture.objects.create(course=course)
-    return HttpResponse(f"Lecture for course '{course.name}' created successfully", status=201)
-
-    
+    return HttpResponse(f"Lecture for course '{course.name}' created successfully", status=200)
 
 def new_qr_upload(request):
     if request.method == "GET":
         return render(request, 'app/new_qr_upload.html')
     return HttpResponse("Error: use a GET request to access create QR code upload page.", status=405)
+
+@csrf_exempt
+def createQRCodeUpload(request):
+    if request.method != "POST":
+        return HttpResponse("Error: only POST is allowed", status=405)
+    if not is_student(request.user):
+        return HttpResponse("Error: only students can upload QR codes", status=401)
+    image = request.FILES.get('imageUpload')
+    if image is None:
+        return HttpResponse("Error: no image uploaded", status=400)
+    QRCodeUpload.objects.create(student=request.user, image = image)
+    return HttpResponse("QR code uploaded successfully", status=200)
+
+def dumpUploads(request):
+    if request.method != "GET":
+        return HttpResponse("Error: only GET is allowed", status=405)
+    if not is_instructor(request.user):
+        return HttpResponse("Error: only instructors can view uploads", status=401)
+    data = [
+        {
+            "username": upload.student.username,
+            "upload_time": upload.uploaded_at.astimezone(CDT).strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        for upload in QRCodeUpload.objects.select_related('student').order_by('uploaded_at')
+    ]
+    return JsonResponse(data, safe=False)
