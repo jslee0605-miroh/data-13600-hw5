@@ -112,15 +112,15 @@ def createCourse(request):
     if not is_instructor(request.user):
         return HttpResponse("Error: only instructors can create courses", status=401)
     try:
-        course_name = request.POST['course_name']
-        start_time = request.POST['start_time']
-        end_time = request.POST['end_time']
+        course_name = request.POST['course-name']
+        start_time = request.POST['start-time']
+        end_time = request.POST['end-time']
         DAYS = ['mon', 'tue', 'wed', 'thu', 'fri']
         days = {f"day_{day}": f"day-{day}" in request.POST for day in DAYS}
     except KeyError:
         return HttpResponse("Error: missing required fields", status=400)
 
-    if Course.objects.filter(name=course_name, instructor=request.user).exists():
+    if Course.objects.filter(name=course_name).exists():
         return HttpResponse("Error: course name already in use", status=400)
 
     course = Course.objects.create(
