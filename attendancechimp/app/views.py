@@ -105,6 +105,35 @@ def new_course(request):
         return render(request, 'app/new_course.html')
     return HttpResponse("Error: use a GET request to access create course page.", status=405)
 
+@csrf_exempt
+def createCourse(request):
+    if request.method != "POST":
+        return HttpResponse("Error: only POST is allowed", status=405)
+    if not is_instructor(request.user):
+        return HttpResponse("Error: only instructors can create courses", status=401)
+    try:
+        course_name = request.POST['course_name']
+        start_time = request.POST['start_time']
+        end_time = request.POST['end_time']
+        DAYS = ['mon', 'tue', 'wed', 'thu', 'fri']
+        days = {f"day_{day}": f"day-{day}" in request.POST for day in DAYS}
+    except KeyError:
+        return HttpResponse("Error: missing required fields", status=400)
+
+    if Course.objects.filter(name=course_name, instructor=request.user).exists():
+        return HttpResponse("Error: course name already in use", status=400)
+
+    course = Course.objects.create(
+        name = course_name, 
+        instructor = request.user,
+        start_time = start_time,
+        end_time = end_time,
+        **days,
+    )
+
+    return HttpResponse(f"Course '{course_name}' created successfully", status=201)
+    
+
 def new_lecture(request):
     if request.method == "GET":
         return render(request, 'app/new_lecture.html')

@@ -1,0 +1,14 @@
+<form method="post" action="/app/createCourse">
+    <input type="text" name="course-name" placeholder="Course Name" required>
+    <input type="time" name="start-time" placeholder="Start Time" required>
+    <input type="time" name="end-time" placeholder="End Time" required>
+    <fieldset>
+        <legend>Days that the course meets (select all that apply):</legend>
+        <label><input type="checkbox" name="day-mon" value="1"> Monday</label>
+        <label><input type="checkbox" name="day-tue" value="1"> Tuesday</label>
+        <label><input type="checkbox" name="day-wed" value="1"> Wednesday</label>
+        <label><input type="checkbox" name="day-thu" value="1"> Thursday</label>
+        <label><input type="checkbox" name="day-fri" value="1"> Friday</label>
+    </fieldset>
+    <button type="submit">Create Course</button>
+</form>
