@@ -100,3 +100,17 @@ def createUser(request):
         login(request, user)
     return HttpResponse("User created successfully", status=200)
 
+def createCourse(request):
+    if request.method == "GET":
+        return render(request, 'app/new_course.html')
+    return HttpResponse("Error: use a GET request to access create course page.", status=405)
+
+def createLecture(request):
+    if request.method == "GET":
+        return render(request, 'app/new_lecture.html')
+    return HttpResponse("Error: use a GET request to access create lecture page.", status=405)
+
+def createQRCodeUpload(request):
+    if request.method == "GET":
+        return render(request, 'app/new_qr_upload.html')
+    return HttpResponse("Error: use a GET request to access create QR code upload page.", status=405)

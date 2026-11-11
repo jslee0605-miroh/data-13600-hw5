@@ -10,4 +10,8 @@ urlpatterns = [
     path('index.html', views.index, name='index_html'),
     path('new', views.new, name='new'),
     path('createUser', views.createUser, name='createUser'),
+    # HW5
+    path('createCourse', views.createCourse, name='createCourse'),
+    path('createLecture', views.createLecture, name='createLecture'),
+    path('createQRCodeUpload', views.createQRCodeUpload, name='createQRCodeUpload'),
 ]
