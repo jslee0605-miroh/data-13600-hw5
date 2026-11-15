@@ -18,6 +18,7 @@ Entities
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 import logging
 import string
 import random
@@ -139,3 +140,21 @@ def is_student(user):
     """Return True if the user has a StudentProfile."""
     return hasattr(user, 'student_profile')
 
+def getUploadsForCourse(course_name):
+    """Return the uploads for the named course made on a meeting day within
+    its start/end time. Returns [] if the course does not exist."""
+    course = Course.objects.filter(name = course_name).first()
+    if course is None:
+        return []
+    validated_uploads = []
+    uploads = QRCodeUpload.objects.filter(lecture__course = course)
+    for upload in uploads:
+        # uploaded_at is stored in UTC; compare in local (America/Chicago) time
+        local = timezone.localtime(upload.uploaded_at)
+        weekday = local.weekday()
+        if weekday > 4 or not course.meets_on_day(weekday):  # 5, 6 = weekend
+            continue
+        if not (course.start_time <= local.time() <= course.end_time):
+            continue
+        validated_uploads.append(upload)
+    return validated_uploads

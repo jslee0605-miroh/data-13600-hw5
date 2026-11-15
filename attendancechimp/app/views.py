@@ -17,7 +17,8 @@ import json
 import io
 
 from .models import (InstructorProfile, StudentProfile, Course, Enrollment,
-                     Lecture, QRCodeUpload, is_instructor, is_student)
+                     Lecture, QRCodeUpload, is_instructor, is_student,
+                     getUploadsForCourse)
 
 CDT = zoneinfo.ZoneInfo("America/Chicago")
 
@@ -181,4 +182,23 @@ def dumpUploads(request):
         }
         for upload in QRCodeUpload.objects.select_related('student').order_by('uploaded_at')
     ]
+    return JsonResponse(data, safe=False)
+
+def getUploads(request):
+    if request.method != "GET":
+        return HttpResponse("Error: only GET is allowed", status = 405)
+    if not is_instructor(request.user):
+        return HttpResponse("Error: only instructors are authenticated to view uploads", status = 401)
+    course = request.GET.get('course')
+    if not course:
+        return JsonResponse({"error": "Missing course parameter"}, status = 400)
+    
+    uploads = getUploadsForCourse(course)
+    data = []
+    for upload in uploads:
+        data.append({
+            "username": upload.student.username,
+            "upload_time": upload.uploaded_at.astimezone(CDT).strftime("%Y-%m-%d %H:%M:%S"),
+        })
+    
     return JsonResponse(data, safe=False)
